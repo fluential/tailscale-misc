@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+  # Container 1: The network gateway responsible for connecting to Tailscale.
+  tailscale-gateway:
+    image: tailscale/tailscale:latest
+    hostname: proxy-gateway
+    environment:
+      - TS_AUTHKEY=tskey-auth-1234
+      - TS_EXTRA_ARGS=--advertise-exit-node --advertise-tags=tag:container
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - ./tailscale-state:/var/lib/tailscale
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+    restart: unless-stopped
+
+  # Container 2: Tinyproxy service using environment variables for configuration.
+  proxy:
+    image: kalaksi/tinyproxy
+    depends_on:
+      - tailscale-gateway
+    network_mode: service:tailscale-gateway
+    restart: unless-stopped
+    environment:
+      # --- Requirement: Allow Tailscale network (100.0.0.0/8) and localhost ---
+      # Space-separated list for allowed clients.
+      TINYPROXY_ALLOW: "127.0.0.1 100.0.0.0/8"
+
+      # --- Requirement: Password Protection ---
+      TINYPROXY_BASIC_AUTH_USER: proxy_user
+      TINYPROXY_BASIC_AUTH_PASSWORD: "tinyproxy-auth-1234"
+
+      # --- Requirement: Disable Via Header ---
+      TINYPROXY_DISABLE_VIA_HEADER: "yes"
