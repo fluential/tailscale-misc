@@ -14,8 +14,8 @@ function FindProxyForURL(url, host) {
     // List of domains related to Slack services.
     var slackDomains = [
         "slack.com",        // Core application
-        "slack-edge.com",   // CDN for static assets
-        "slack-imgs.com",   // Image hosting CDN
+        //"slack-edge.com",   // CDN for static assets
+        //"slack-imgs.com",   // Image hosting CDN
         "slackb.com",       // Internal/utility domain
         "slackdns.com",     // DNS management for Slack services
         //"chime.aws"         // Backend for Slack Huddles and calls (Amazon Chime)
